@@ -1,4 +1,6 @@
-# Storage Class Notes
+# Storage Class Notes - Azure Disk
+
+[Azure managed disks](https://learn.microsoft.com/en-us/azure/virtual-machines/managed-disks-overview) are block-level storage volumes that are managed by Azure and used with Azure Virtual Machines. Managed disks are like a physical disk in an on-premises server but, virtualized. With managed disks, all you have to do is specify the disk size, the disk type, and provision the disk. Once you provision the disk, Azure handles the rest.
 
 ## Binding Modes
 
@@ -13,7 +15,6 @@ A cluster administrator can address this issue by specifying the WaitForFirstCon
 
 ### Delete (default)
 - With this setting, as soon as a PersistentVolumeClaim is deleted, it also triggers the removal of the corresponding PersistentVolume along with the Azure Disk. This means if you intend to retain the data as backup, then it will not be possible.
-#We will be surprised provided if we intended to retain that data as backup.
 
 ### Retain (Recommended)
 -  Disk is retained even when PVC is deleted
@@ -27,6 +28,8 @@ A cluster administrator can address this issue by specifying the WaitForFirstCon
 
 ### Example
 
+#### Custom
+
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -39,3 +42,18 @@ allowVolumeExpansion: true
 parameters:
   storageaccounttype: Premium_LRS # or use Standard_LRS
   kind: managed
+```
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: azure-managed-disk-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: managed-premium-retain-sc
+  resources:
+    requests:
+      storage: 5Gi  
+```
